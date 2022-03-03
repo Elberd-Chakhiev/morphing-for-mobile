@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/110/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.2.4/gsap.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas></canvas>
+
+<div class="vertex">
+  varying vec2 vUv;
+  void main() {
+  vUv = uv;
+  gl_Position = projectionMatrix 
+  * modelViewMatrix 
+  * vec4( position, 1.0 );
+  }
+</div>
+<div class="fragment">
+  varying vec2 vUv;
+  uniform sampler2D u_texture;
+  uniform sampler2D u_displacement_map;
+  uniform sampler2D u_next_texture;
+  uniform float u_transition;
+  uniform float u_direction;
+
+
+  void main () {
+  vec2 uv_t = vec2(vUv.s, vUv.t);
+  //vec4 displace_current = texture2D(u_texture, uv_t);
+  //vec4 displace_next = texture2D(u_next_texture, uv_t);
+  vec4 displace_current = texture2D(u_displacement_map, uv_t);
+  vec4 displace_next = texture2D(u_displacement_map, uv_t);
+
+  vec2 uv_displaced1 = vec2(vUv.x + (displace_current.g * u_direction) * u_transition, vUv.y);
+  vec2 uv_displaced2 = vec2(vUv.x - (displace_next.g * u_direction) * (1. - u_transition), vUv.y);
+
+  vec4 texture = mix(texture2D(u_texture, uv_displaced1), texture2D(u_next_texture, uv_displaced2), u_transition);
+
+  gl_FragColor = texture;
+  }
+</div>
+
+<script src="scrypt.js"></script>
+</body>
+</html>
